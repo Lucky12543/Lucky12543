@@ -1,0 +1,117 @@
+import pygame, sys
+
+screen = pygame.display.set_mode((600, 300))
+clock = pygame.time.Clock()
+
+pygame.init()
+
+Players = []
+
+class Player:
+    def __init__(self, x, y, width, height, speed, score):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.speed = speed
+        self.score = score
+
+    def move(self, direction):
+        if direction == 'w':
+            self.y -= self.speed
+        if direction == 's':
+            self.y += self.speed
+
+    def draw(self):
+        pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, self.width, self.height), 0)
+
+class Ball:
+    def __init__(self, x, y, directionx, directiony):
+        self.x = x
+        self.y = y
+        self.directionx = directionx
+        self.directiony = directiony
+
+    def move(self):
+        self.x += 7 * self.directionx
+        self.y += 7 * self.directiony
+
+    def collisiontest(self):
+        p1hitbox = pygame.Rect(p1.x, p1.y, p1.width, p1.height)
+        p2hitbox = pygame.Rect(p2.x, p2.y, p2.width, p2.height)
+
+        ballhitbox = pygame.Rect(self.x, self.y, 10, 10)
+
+        if ballhitbox.colliderect(p1hitbox) or ballhitbox.colliderect(p2hitbox):
+            self.directionx = self.directionx / -1
+        elif self.y >= 300 or self.y <= 0:
+            self.directiony = self.directiony / -1
+
+    def draw(self):
+        pygame.draw.circle(screen, (255, 255, 255), (self.x, self.y), 5)
+
+    def pointcheck(self):
+        if self.x <= 0:
+            self.x = 300
+            self.y = 150
+            self.directionx = self.directionx / -1
+            p2.score += 1
+        if self.x >= 600:
+            self.x = 300
+            self.y = 150
+            self.directionx = self.directionx / -1
+            p1.score += 1
+
+def pointsdraw():
+    p1points = pygame.font.SysFont('', 30)
+    p1points = p1points.render(str(p1.score), bool(1), (255, 255, 255))
+    screen.blit(p1points, (280, 10))
+
+    p2points = pygame.font.SysFont('', 30)
+    p2points = p2points.render(str(p2.score), bool(1), (255, 255, 255))
+    screen.blit(p2points, (320, 10))
+
+running = True
+
+ball = Ball(300, 150, 1, 1)
+p1 = Player(30, 260, 5, 60, 7, 0)
+p2= Player(570, 260, 5, 60, 7, 0)
+
+Players.append(p1)
+Players.append(p2)
+
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+
+    screen.fill((0, 0, 0))
+
+    pressed = pygame.key.get_pressed()
+
+    ball.collisiontest()
+    ball.move()
+    ball.draw()
+
+    ball.pointcheck()
+
+    pointsdraw()
+
+    if pressed[pygame.K_w]:
+        p1.move('w')
+    if pressed[pygame.K_s]:
+        p1.move('s')
+
+    if pressed[pygame.K_UP]:
+        p2.move('w')
+    if pressed[pygame.K_DOWN]:
+        p2.move('s')
+
+    for player in Players:
+        player.draw()
+
+    pygame.draw.line(screen, (255, 255, 255), (302, 0), (302, 300), 1)
+
+    pygame.display.update()
+
+    clock.tick(30)
